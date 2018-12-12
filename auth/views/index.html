@@ -8,18 +8,26 @@
         
 <body>  
     <div ng-controller="myController">
-        <h2 id="welcomeText">Welcome. You are Logged In as
-            <%= username %>
+        <h2 id="welcomeText">Welcome
+            <%= username %>. Enter a new note to get started!
         </h2>
-        <a id="logoutLink" href="/logout">logout</a>
-        <a id="editLink" href="/user">Edit User</a>
-        <p>Place Your Code Here
-            <p>
+		<div>
+			<button id="logoutLink" href="/logout">logout</button>
+			<!--<a id="editLink" href="/user">Edit User</a>-->
+		</div>
+		<hr>
+		<textarea rows="4" cols="50">
+			This is an example note
+		</textarea>
     </div>
     <hr>
     <span id="indexMsg">
-        <%= msg %>
+		Notes:
+		<%= msg %>
     </span>
+	<div>
+		<button id="addNoteLink" href="/addNote">Add Note</button>
+	</div>
     <hr>
     <span id="colorText">
     Color

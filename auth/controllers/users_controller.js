@@ -1,6 +1,7 @@
 var crypto = require('crypto');
 var mongoose = require('mongoose'),
-    User = mongoose.model('User');
+    User = mongoose.model('User'),
+	Note = mongoose.model('Note');
 function hashPW(pwd){
   return crypto.createHash('sha256').update(pwd).
          digest('base64').toString();
@@ -27,31 +28,51 @@ exports.signup = function(req, res){
     }
   });
 };
+exports.addNote = function(req, res){
+	console.log("1")
+	var note = new Note({username: req.body.username, content: req.body.note})	
+	note.save(function(err){
+		console.log("2")
+		if (err) {
+			console.log("3")
+			res.session.error = err;
+      		res.redirect('/signup');
+		} else {
+			// Do nothing
+			console.log("4")
+			res.session.notes.push(req.body.note);
+		}
+	});
+};
+
 exports.login = function(req, res){
   User.findOne({ username: req.body.username })
   .exec(function(err, user) {
-    if (!user){
-      err = 'User Not Found.';
-    } else if (user.hashed_password ===
-               hashPW(req.body.password.toString())) {
-      req.session.regenerate(function(){
-        console.log("login");
-        console.log(user);
-        req.session.user = user.id;
-        req.session.username = user.username;
-        req.session.msg = 'Authenticated as ' + user.username;
-        req.session.color = user.color;
-        res.redirect('/');
-      });
-    }else{
-      err = 'Authentication failed.';
-    }
-    if(err){
-      req.session.regenerate(function(){
-        req.session.msg = err;
-        res.redirect('/login');
-      });
-    }
+	Note.find({username: req.body.username}).exec(function(err2, notes){
+		if (!user){
+		  err = 'User Not Found.';
+		} else if (user.hashed_password ===
+				   hashPW(req.body.password.toString())) {
+		  req.session.regenerate(function(){
+			console.log("login");
+			console.log(user);
+			req.session.user = user.id;
+			req.session.username = user.username;
+			req.session.notes = notes;
+			req.session.msg = 'Authenticated as ' + user.username;
+			req.session.color = user.color;
+			res.redirect('/');
+		  });
+		}else{
+		  err = 'Authentication failed.';
+		}
+		if(err){
+		  req.session.regenerate(function(){
+			req.session.msg = err;
+			res.redirect('/login');
+		  });
+		}
+	});
   });
 };
 exports.getUserProfile = function(req, res) {
@@ -64,6 +85,9 @@ exports.getUserProfile = function(req, res) {
     }
   });
 };
+exports.getUserNotes = function(req, res) {
+	Notes.findOne()
+}
 exports.updateUser = function(req, res){
   User.findOne({ _id: req.session.user })
   .exec(function(err, user) {
